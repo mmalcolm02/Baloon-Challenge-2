@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerControllerX : MonoBehaviour
 {
     public bool gameOver;
-    public bool isOnGround;
+    public bool isOnGround = false;
 
     public float floatForce;
     private float gravityModifier = 1.5f;
@@ -18,6 +18,7 @@ public class PlayerControllerX : MonoBehaviour
     private AudioSource playerAudio;
     public AudioClip moneySound;
     public AudioClip explodeSound;
+    public AudioClip boingSound;
 
 
     // Start is called before the first frame update
@@ -36,16 +37,15 @@ public class PlayerControllerX : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        //prevent movement above screen
         if (transform.position.y > rangeY)
         {
             transform.position = new Vector3(-3, 15, 0);
         }
         // While space is pressed and player is low enough, float up
-        if (Input.GetKey(KeyCode.Space) && !gameOver && transform.position.y < rangeY && !isOnGround)
+        if (Input.GetKey(KeyCode.Space) && !gameOver && transform.position.y < rangeY)
         {
             playerRb.AddForce(Vector3.up * floatForce);
-            isOnGround = false;
         }
     }
 
@@ -61,10 +61,13 @@ public class PlayerControllerX : MonoBehaviour
             Destroy(other.gameObject);
         }
 
-        if (other.gameObject.CompareTag("Ground")) {
+        //if player collides with ground during play balloon bounces and boing plays
+        else if (other.gameObject.CompareTag("Ground") && !gameOver) {
+
             isOnGround = true;
-            playerAudio.PlayOneShot(explodeSound, 1.0f);
-            playerRb.AddForce(Vector3.up * 5, ForceMode.Impulse);
+            playerAudio.PlayOneShot(boingSound, 1.0f);
+            playerRb.AddForce(Vector3.up * 10, ForceMode.Impulse);
+            isOnGround = false;
         }
 
         // if player collides with money, fireworks
@@ -75,7 +78,6 @@ public class PlayerControllerX : MonoBehaviour
             Destroy(other.gameObject);
 
         }
-
     }
 
 }
